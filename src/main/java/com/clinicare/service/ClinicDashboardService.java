@@ -142,7 +142,7 @@ public class ClinicDashboardService {
         }).collect(Collectors.toList());
     }
 
-    // Get ALL slots for a date (booked + available) for availability view
+    // Get ALL slots for a date 
     public Map<String, Object> getSlotAvailability(String email, String date) {
         Clinic c = getClinicForUser(email);
         LocalDate d = date != null ? LocalDate.parse(date) : LocalDate.now();

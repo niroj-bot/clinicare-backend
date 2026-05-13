@@ -48,7 +48,7 @@ public class ClinicSearchService {
 
         List<Long> clinicIds = clinics.stream().map(Clinic::getId).toList();
 
-        // 2. Fetch ALL services and slots in just 2 queries
+        // 2. Fetch ALL services and slots
         Map<Long, List<ClinicService>> servicesMap = serviceRepo
                 .findByClinicIdInAndAvailableTrue(clinicIds)
                 .stream().collect(Collectors.groupingBy(s -> s.getClinic().getId()));

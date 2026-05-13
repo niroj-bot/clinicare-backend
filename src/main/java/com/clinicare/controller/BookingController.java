@@ -75,7 +75,7 @@ public class BookingController {
         var user = userRepo.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Use fetch join query to load everything in 1 query
+        // load everything in 1 query
         List<Booking> bookings = bookingRepo.findByUserIdWithDetails(user.getId());
 
         return ResponseEntity.ok(bookings.stream().map(b -> Map.of(

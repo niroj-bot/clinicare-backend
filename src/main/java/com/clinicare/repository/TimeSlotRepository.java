@@ -1,15 +1,16 @@
 package com.clinicare.repository;
 
-import com.clinicare.model.TimeSlot;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+import com.clinicare.model.TimeSlot;
 
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
@@ -36,7 +37,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     // Prevent duplicate slot creation
     long countByClinicIdAndDateAndStartTime(Long clinicId, LocalDate date, LocalTime startTime);
 
-    // Cleanup — delete old UNBOOKED slots (keeps booked ones for booking history)
+    // Cleanup — delete old UNBOOKED slots 
     @Modifying
     @Query("DELETE FROM TimeSlot t WHERE t.date < :cutoff AND t.isBooked = false")
     int deleteUnbookedSlotsBefore(@Param("cutoff") LocalDate cutoff);

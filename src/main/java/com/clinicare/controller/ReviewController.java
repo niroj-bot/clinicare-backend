@@ -1,18 +1,29 @@
 package com.clinicare.controller;
 
-import com.clinicare.model.Review;
-import com.clinicare.repository.UserRepository;
-import com.clinicare.service.ReviewService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.clinicare.model.Review;
+import com.clinicare.repository.UserRepository;
+import com.clinicare.service.ReviewService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -35,7 +46,7 @@ public class ReviewController {
         )).collect(Collectors.toList()));
     }
 
-    /** POST /api/reviews — logged-in or guest can post */
+    
     @PostMapping
     public ResponseEntity<?> addReview(
             @Valid @RequestBody ReviewRequest req,

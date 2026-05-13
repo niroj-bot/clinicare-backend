@@ -1,5 +1,21 @@
 package com.clinicare.controller;
 
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.clinicare.config.JwtUtil;
 import com.clinicare.email.EmailService;
 import com.clinicare.model.Booking;
@@ -7,16 +23,8 @@ import com.clinicare.model.User;
 import com.clinicare.repository.BookingRepository;
 import com.clinicare.repository.UserRepository;
 import com.clinicare.service.OtpStore;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
 
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +42,7 @@ public class AuthController {
         return String.format("%06d", new SecureRandom().nextInt(999999));
     }
 
-    // ─── Step 1: Send OTP to email ────────────────────────────────
+    // Send OTP to email
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody SendOtpRequest req) {
         if (userRepo.existsByEmail(req.email())) {
@@ -46,7 +54,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Verification code sent to " + req.email()));
     }
 
-    // ─── Step 2: Verify OTP + complete registration ───────────────
+    // Verify OTP + complete registration
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         if (userRepo.existsByEmail(req.email())) {
@@ -77,7 +85,7 @@ public class AuthController {
         ));
     }
 
-    // ─── Login ────────────────────────────────────────────────────
+    // Login
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         User user = userRepo.findByEmail(req.email()).orElse(null);
@@ -91,7 +99,7 @@ public class AuthController {
         ));
     }
 
-    // ─── Forgot password: send OTP ────────────────────────────────
+    // Forgot password: send OTP
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody EmailRequest req) {
         User user = userRepo.findByEmail(req.email()).orElse(null);
@@ -105,7 +113,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset code sent to " + req.email()));
     }
 
-    // ─── Reset password: verify OTP + set new password ───────────
+    // Reset password: verify OTP + set new password
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
         if (!otpStore.verify("reset_" + req.email(), req.otp())) {
@@ -118,7 +126,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
-    // ─── Records ─────────────────────────────────────────────────
+    // Records
     record SendOtpRequest(String name, @Email String email) {}
     record RegisterRequest(
         @NotBlank String name, @Email @NotBlank String email,

@@ -58,10 +58,7 @@ public class ClinicController {
         return ResponseEntity.ok(results);
     }
 
-    /**
-     * GET /api/clinics/{id}
-     * Full clinic detail — optimized: fetches today + tomorrow slots in 1 query
-     */
+   
     @GetMapping("/{id}")
     public ResponseEntity<?> getClinic(
             @PathVariable Long id,
@@ -116,10 +113,7 @@ public class ClinicController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * GET /api/clinics/compare?ids=1,2,3
-     * Optimized: fetches all clinics and services in 2 queries
-     */
+    
     @GetMapping("/compare")
     public ResponseEntity<?> compare(
             @RequestParam List<Long> ids,
@@ -153,9 +147,7 @@ public class ClinicController {
         return ResponseEntity.ok(results);
     }
 
-    /**
-     * GET /api/clinics/urgency
-     */
+    
     @GetMapping("/urgency")
     public ResponseEntity<?> urgencyMode(
             @RequestParam(required = false) Double userLat,
@@ -168,10 +160,7 @@ public class ClinicController {
         return ResponseEntity.ok(results.stream().limit(3).toList());
     }
 
-    /**
-     * GET /api/clinics/{id}/slots?date=2026-05-03
-     * Returns available slots for a specific date, filtering past times for today
-     */
+   
     @GetMapping("/{id}/slots")
     public ResponseEntity<?> getSlotsByDate(
             @PathVariable Long id,

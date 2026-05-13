@@ -1,18 +1,20 @@
 package com.clinicare.service;
 
-import com.clinicare.model.Clinic;
-import com.clinicare.model.TimeSlot;
-import com.clinicare.repository.ClinicRepository;
-import com.clinicare.repository.TimeSlotRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+import com.clinicare.model.Clinic;
+import com.clinicare.model.TimeSlot;
+import com.clinicare.repository.ClinicRepository;
+import com.clinicare.repository.TimeSlotRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -22,7 +24,6 @@ public class SlotScheduler {
     private final ClinicRepository   clinicRepo;
     private final TimeSlotRepository slotRepo;
 
-    // Standard working hours — 13 slots per day per clinic
     private static final LocalTime[] SLOT_TIMES = {
         // Morning: 09:00 - 12:00
         LocalTime.of(9,  0), LocalTime.of(9,  30),
@@ -47,23 +48,13 @@ public class SlotScheduler {
         generate(7);
     }
 
-    /**
-     * Runs 30 seconds after app starts — ensures slots exist immediately
-     */
     @Scheduled(initialDelay = 30000, fixedDelay = Long.MAX_VALUE)
     public void generateOnStartup() {
         log.info("⏰ SlotScheduler startup — ensuring 7 days of slots exist...");
         generate(7);
     }
 
-    /**
-     * Cleanup job — runs every day at 2:00 AM
-     * Deletes UNBOOKED slots older than 30 days
-     * Keeps booked slots forever (needed for booking history)
-     *
-     * DB size stays fixed:
-     *   Max rows = 50 clinics × 13 slots × 7 days = ~4,550 rows always
-     */
+   
     @Scheduled(cron = "0 0 2 * * *")
     @Transactional
     public void cleanOldSlots() {

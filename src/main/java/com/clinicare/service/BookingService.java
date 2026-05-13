@@ -1,16 +1,26 @@
 package com.clinicare.service;
 
-import com.clinicare.email.EmailService;
-import com.clinicare.model.*;
-import com.clinicare.repository.*;
-import com.clinicare.websocket.SlotUpdateMessage;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import com.clinicare.email.EmailService;
+import com.clinicare.model.Booking;
+import com.clinicare.model.Clinic;
+import com.clinicare.model.ClinicService;
+import com.clinicare.model.TimeSlot;
+import com.clinicare.model.User;
+import com.clinicare.repository.BookingRepository;
+import com.clinicare.repository.ClinicRepository;
+import com.clinicare.repository.ClinicServiceRepository;
+import com.clinicare.repository.TimeSlotRepository;
+import com.clinicare.repository.UserRepository;
+import com.clinicare.websocket.SlotUpdateMessage;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +33,7 @@ public class BookingService {
     private final UserRepository userRepo;
     private final EmailService emailService;
 
-    // Optional — only injected if WebSocket starter is active
+    // only injected if WebSocket starter is active
     @Autowired(required = false)
     private SimpMessagingTemplate messaging;
 
@@ -35,7 +45,7 @@ public class BookingService {
                     new SlotUpdateMessage(clinicId, slotId, true)
                 );
             } catch (Exception e) {
-                // WebSocket not ready — skip broadcast silently
+                
             }
         }
     }

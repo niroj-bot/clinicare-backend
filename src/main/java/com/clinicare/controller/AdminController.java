@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,13 +26,12 @@ import com.clinicare.model.Clinic;
 import com.clinicare.model.ClinicService;
 import com.clinicare.model.TimeSlot;
 import com.clinicare.model.User;
-import com.clinicare.service.SlotScheduler;
-import com.clinicare.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.clinicare.repository.BookingRepository;
 import com.clinicare.repository.ClinicRepository;
 import com.clinicare.repository.ClinicServiceRepository;
 import com.clinicare.repository.TimeSlotRepository;
+import com.clinicare.repository.UserRepository;
+import com.clinicare.service.SlotScheduler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,14 +49,14 @@ public class AdminController {
     private final SlotScheduler           slotScheduler;
     private final PasswordEncoder         passwordEncoder;
 
-    // ─── Clinics ──────────────────────────────────────────────────
+    // Clinics
 
     @GetMapping("/clinics")
     public ResponseEntity<?> getAllClinics() {
         List<Clinic> clinics = clinicRepo.findAll();
         List<Long> clinicIds = clinics.stream().map(Clinic::getId).toList();
 
-        // Fetch ALL services and slots in just 2 queries
+        // Fetch ALL services and slots
         Map<Long, List<ClinicService>> servicesMap = serviceRepo.findByClinicIdIn(clinicIds)
                 .stream().collect(Collectors.groupingBy(s -> s.getClinic().getId()));
 
@@ -136,7 +136,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("deleted", true));
     }
 
-    // ─── Services ─────────────────────────────────────────────────
+    // Services
 
     @PostMapping("/clinics/{clinicId}/services")
     public ResponseEntity<?> addService(@PathVariable Long clinicId, @RequestBody ServiceRequest req) {
@@ -169,7 +169,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("deleted", true));
     }
 
-    // ─── Time Slots ───────────────────────────────────────────────
+    // Time Slots
 
     @PostMapping("/clinics/{clinicId}/slots")
     public ResponseEntity<?> addSlot(@PathVariable Long clinicId, @RequestBody SlotRequest req) {
@@ -186,8 +186,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("id", saved.getId()));
     }
 
-    // ─── Bookings ─────────────────────────────────────────────────
-
+    // Bookings
     @GetMapping("/bookings")
     public ResponseEntity<?> getAllBookings() {
         List<Map<String, Object>> result = bookingRepo.findAll().stream()
@@ -231,7 +230,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("updated", true));
     }
 
-    // ─── Stats ────────────────────────────────────────────────────
+    // Stats
 
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
@@ -243,7 +242,7 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // ─── Request records ──────────────────────────────────────────
+    // Request records 
 
     record ClinicRequest(
         String name, String address, String phone,
@@ -261,7 +260,7 @@ public class AdminController {
         LocalTime endTime, Integer waitMinutes
     ) {}
 
-    // ─── Create clinic account ────────────────────────────────────
+    // Create clinic account
     @PostMapping("/clinics/{id}/account")
     public ResponseEntity<?> createClinicAccount(
             @PathVariable Long id,
@@ -299,7 +298,7 @@ public class AdminController {
         ));
     }
 
-    // ─── Get clinic account info ──────────────────────────────────
+    // Get clinic account info
     @GetMapping("/clinics/{id}/account")
     public ResponseEntity<?> getClinicAccount(@PathVariable Long id) {
         return userRepo.findAll().stream()
@@ -318,7 +317,7 @@ public class AdminController {
     record CreateAccountRequest(String email, String password) {}
 
 
-    // ─── Manual slot generation trigger ──────────────────────────
+    // Manual slot generation
     @PostMapping("/slots/generate")
     public ResponseEntity<?> triggerSlotGeneration() {
         slotScheduler.generateOnStartup();

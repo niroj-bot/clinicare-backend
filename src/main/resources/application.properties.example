@@ -1,0 +1,31 @@
+# =============================================
+# LOCAL DEVELOPMENT (H2 in-memory database)
+# Copy this file to application.properties
+# and fill in your real values
+# =============================================
+
+# H2 Local Database
+spring.datasource.url=jdbc:h2:file:./clinicare-dev
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# CORS
+app.cors.allowed-origins=http://localhost:5173
+
+# JWT
+app.jwt.secret=clinicare-super-secret-key-change-in-prod-min-32-chars
+app.jwt.expiration=86400000
+
+# Seed data (true = insert 50 clinics on first run)
+app.seed-data=true
+
+# SendGrid Email
+app.sendgrid.api-key=YOUR_SENDGRID_API_KEY
+app.sendgrid.from-email=your@email.com
