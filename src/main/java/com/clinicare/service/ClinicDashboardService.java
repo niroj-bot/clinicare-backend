@@ -26,7 +26,6 @@ import com.clinicare.repository.TimeSlotRepository;
 import com.clinicare.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class ClinicDashboardService {
@@ -66,6 +65,7 @@ public class ClinicDashboardService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getBookings(String email, String date, String status) {
         Clinic c = getClinicForUser(email);
         List<Booking> list = bookingRepo.findByClinicId(c.getId());
