@@ -207,9 +207,10 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/clinics/{clinicId}/bookings")
     public ResponseEntity<?> getClinicBookings(@PathVariable Long clinicId) {
-        List<Map<String, Object>> result = bookingRepo.findByClinicId(clinicId).stream()
+    	List<Map<String, Object>> result = bookingRepo.findByClinicIdWithDetails(clinicId).stream()
                 .map(b -> {
                     Map<String, Object> map = new LinkedHashMap<>();
                     map.put("id",          b.getId());

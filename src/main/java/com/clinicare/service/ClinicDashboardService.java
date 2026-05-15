@@ -44,8 +44,9 @@ public class ClinicDashboardService {
         return user.getManagedClinic();
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> getDashboard(String email) {
-        Clinic c = getClinicForUser(email);bookingRepo.findByClinicId(c.getId());
+    	Clinic c = getClinicForUser(email);
         List<Booking> all = bookingRepo.findByClinicIdWithDetails(c.getId());
         List<Booking> today = all.stream()
                 .filter(b -> b.getTimeSlot().getDate().equals(LocalDate.now()))
@@ -68,7 +69,7 @@ public class ClinicDashboardService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getBookings(String email, String date, String status) {
         Clinic c = getClinicForUser(email);
-        List<Booking> list = bookingRepo.findByClinicId(c.getId());
+        List<Booking> list = bookingRepo.findByClinicIdWithDetails(c.getId());
         if (date != null && !date.isBlank()) {
             LocalDate d = LocalDate.parse(date);
             list = list.stream().filter(b -> b.getTimeSlot().getDate().equals(d)).collect(Collectors.toList());
