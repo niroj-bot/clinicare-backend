@@ -191,7 +191,7 @@ public class AdminController {
     @Transactional(readOnly = true)
     @GetMapping("/bookings")
     public ResponseEntity<?> getAllBookings() {
-        List<Map<String, Object>> result = bookingRepo.findAll().stream()
+        List<Map<String, Object>> result = bookingRepo.findAllWithDetails().stream()
                 .map(b -> {
                     Map<String, Object> map = new LinkedHashMap<>();
                     map.put("id",          b.getId());

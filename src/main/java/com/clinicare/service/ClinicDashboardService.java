@@ -45,8 +45,8 @@ public class ClinicDashboardService {
     }
 
     public Map<String, Object> getDashboard(String email) {
-        Clinic c = getClinicForUser(email);
-        List<Booking> all   = bookingRepo.findByClinicId(c.getId());
+        Clinic c = getClinicForUser(email);bookingRepo.findByClinicId(c.getId());
+        List<Booking> all = bookingRepo.findByClinicIdWithDetails(c.getId());
         List<Booking> today = all.stream()
                 .filter(b -> b.getTimeSlot().getDate().equals(LocalDate.now()))
                 .collect(Collectors.toList());

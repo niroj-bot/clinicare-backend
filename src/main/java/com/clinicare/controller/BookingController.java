@@ -90,21 +90,8 @@ public class BookingController {
         )).toList());
     }
 
-    @GetMapping("/ref/{ref}")
-    public ResponseEntity<?> getByRef(@PathVariable String ref) {
-        return bookingRepo.findByBookingRefWithDetails(ref)
-                .map(b -> ResponseEntity.ok(Map.of(
-                        "bookingRef",  b.getBookingRef(),
-                        "clinicName",  b.getClinic().getName(),
-                        "serviceName", b.getService().getServiceName(),
-                        "date",        b.getTimeSlot().getDate().toString(),
-                        "startTime",   b.getTimeSlot().getStartTime().toString(),
-                        "status",      b.getStatus()
-                )))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PatchMapping("/{id}/cancel")
+    
     public ResponseEntity<?> cancelBooking(@PathVariable Long id, Authentication auth) {
         Booking booking = bookingRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
