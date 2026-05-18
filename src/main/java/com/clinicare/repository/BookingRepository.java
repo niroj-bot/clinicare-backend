@@ -45,4 +45,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByClinicId(Long clinicId);
     Optional<Booking> findByBookingRef(String bookingRef);
     List<Booking> findByGuestEmail(String guestEmail);
+    
+    @Query("SELECT b FROM Booking b " +
+    	       "LEFT JOIN FETCH b.clinic " +
+    	       "LEFT JOIN FETCH b.service " +
+    	       "LEFT JOIN FETCH b.timeSlot " +
+    	       "LEFT JOIN b.user u " +
+    	       "WHERE b.bookingRef = :ref " +
+    	       "AND (LOWER(b.guestEmail) = :email OR LOWER(u.email) = :email)")
+    	Optional<Booking> findByRefAndEmail(
+    	        @Param("ref")   String ref,
+    	        @Param("email") String email);
+    
+    @Query("SELECT b FROM Booking b " +
+    	       "JOIN FETCH b.timeSlot " +
+    	       "JOIN FETCH b.user " +
+    	       "WHERE b.id = :id")
+    	Optional<Booking> findByIdWithDetails(@Param("id") Long id);
+    
 }

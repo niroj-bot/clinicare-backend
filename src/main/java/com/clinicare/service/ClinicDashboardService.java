@@ -37,7 +37,7 @@ public class ClinicDashboardService {
     private final ClinicServiceRepository serviceRepo;
 
     public Clinic getClinicForUser(String email) {
-        User user = userRepo.findByEmail(email)
+        	User user = userRepo.findByEmailWithClinic(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (user.getManagedClinic() == null)
             throw new BadRequestException("No clinic assigned to this account");

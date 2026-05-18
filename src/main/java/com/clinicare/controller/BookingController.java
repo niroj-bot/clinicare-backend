@@ -1,7 +1,8 @@
 package com.clinicare.controller;
-
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -10,12 +11,14 @@ import jakarta.validation.constraints.NotNull;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clinicare.model.Booking;
@@ -25,7 +28,6 @@ import com.clinicare.repository.UserRepository;
 import com.clinicare.service.BookingService;
 
 import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
@@ -51,6 +53,37 @@ public class BookingController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+    
+    @Transactional(readOnly = true)
+    @GetMapping("/track")
+    public ResponseEntity<?> trackBooking(
+            @RequestParam String ref,
+            @RequestParam String email) {
+
+        Optional<Booking> found = bookingRepo.findByRefAndEmail(
+                ref.trim().toUpperCase(),
+                email.trim().toLowerCase()
+        );
+
+        if (found.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("error", "No booking found with this reference and email."));
+        }
+
+        Booking b = found.get();
+        return ResponseEntity.ok(Map.of(
+                "id",          b.getId(),
+                "bookingRef",  b.getBookingRef(),
+                "clinicName",  b.getClinic().getName(),
+                "serviceName", b.getService().getServiceName(),
+                "price",       b.getService().getPrice(),
+                "date",        b.getTimeSlot().getDate().toString(),
+                "startTime",   b.getTimeSlot().getStartTime().toString(),
+                "status",      b.getStatus().toString(),
+                "guestName",   b.getGuestName()  != null ? b.getGuestName()  : "",
+                "userName",    b.getUser()        != null ? b.getUser().getName() : ""
+        ));
     }
 
     @PostMapping
@@ -90,20 +123,31 @@ public class BookingController {
         )).toList());
     }
 
+    @Transactional
     @PatchMapping("/{id}/cancel")
-    
     public ResponseEntity<?> cancelBooking(@PathVariable Long id, Authentication auth) {
-        Booking booking = bookingRepo.findById(id)
+
+        // Use JOIN FETCH to avoid lazy load crash on PostgreSQL
+        Booking booking = bookingRepo.findByIdWithDetails(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
+        // Ownership check
         if (booking.getUser() == null ||
             !booking.getUser().getEmail().equals(auth.getName())) {
             return ResponseEntity.status(403).body(Map.of("error", "Not your booking"));
         }
 
+        // Status check
         if (booking.getStatus() == Booking.Status.COMPLETED ||
             booking.getStatus() == Booking.Status.CANCELLED) {
             return ResponseEntity.badRequest().body(Map.of("error", "Cannot cancel this booking"));
+        }
+
+        // ← NEW: Past date check
+        LocalDate bookingDate = booking.getTimeSlot().getDate();
+        if (bookingDate.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Cannot cancel a past appointment"));
         }
 
         var slot = booking.getTimeSlot();
@@ -114,7 +158,6 @@ public class BookingController {
         bookingRepo.save(booking);
         return ResponseEntity.ok(Map.of("cancelled", true));
     }
-
     record GuestBookingRequest(
             @NotNull Long clinicId, @NotNull Long serviceId, @NotNull Long timeSlotId,
             @NotBlank String guestName, @Email @NotBlank String guestEmail,
@@ -126,3 +169,5 @@ public class BookingController {
             @NotNull Long timeSlotId, String notes
     ) {}
 }
+
+	
